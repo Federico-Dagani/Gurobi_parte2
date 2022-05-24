@@ -51,11 +51,12 @@ public class Gurobi {
             //vincoli per imporre l'attivazione di un solo link entrant e uscente
             for(int i=0; i<N_VERTICI; i++){
                 expr = new GRBLinExpr();
-                for(int j=N_VERTICI*i; j<N_VERTICI*i-i; j++){
-                    //if(vertici[j][0] == i || vertici[j][1] == i)
+                for(int j=0; j<LATI; j++){
+                    if(vertici[j][0] == i || vertici[j][1] == i)
                     expr.addTerm(1,link[j]);
                 }
-                model.addConstr(expr, GRB.EQUAL, 1, "una ed una sola entrata ed uscita per vertice");
+                //metto expr = 2 perchè per ogni nodo devo avere 2 link attivi
+                model.addConstr(expr, GRB.EQUAL, 2, "una ed una sola entrata ed uscita per vertice");
             }
 
             //vincoli di Miller-Tucker-Zemil
@@ -64,7 +65,7 @@ public class Gurobi {
             expr.addTerm(1,u[1]);
             model.addConstr(expr, GRB.EQUAL, 1, "assegnazione u[1]");
             //2 <= u[i] <= n
-            for (int i=2; i<N_VERTICI; i++){
+            for (int i=2; i<N_VERTICI-2; i++){
                 expr = new GRBLinExpr();
                 expr.addTerm(1,u[i]);
                 model.addConstr(expr, GRB.GREATER_EQUAL, 2, "limite inferiore di 2");
@@ -81,9 +82,9 @@ public class Gurobi {
                     expr.addConstant(2-N_VERTICI+trovaCosto(i, j, vertici)*N_VERTICI-1);
                 }
             }
-
-
             model.optimize();
+
+            System.out.printf("funzione obiettivo = %.4f\n", model.get(GRB.DoubleAttr.ObjVal));
 
         }catch(GRBException e){
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());

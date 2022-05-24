@@ -76,3 +76,262 @@ Solution count 0
 
 Model is infeasible
 Best objective -, best bound -, gap -
+
+Gurobi 9.5.1 (win64, Java) logging started Tue May 24 11:45:35 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 43 rows, 946 columns and 0 nonzeros
+Model fingerprint: 0x6e11ffcc
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 1e+00]
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds (0.00 work units)
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 9.5.1 (win64, Java) logging started Tue May 24 12:00:49 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 128 rows, 946 columns and 85 nonzeros
+Model fingerprint: 0x1cfe5d52
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 4e+01]
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds (0.00 work units)
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 9.5.1 (win64, Java) logging started Tue May 24 12:01:08 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 127 rows, 946 columns and 84 nonzeros
+Model fingerprint: 0xda562f8b
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 4e+01]
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds (0.00 work units)
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 9.5.1 (win64, Java) logging started Tue May 24 23:32:33 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 43 rows, 946 columns and 1806 nonzeros
+Model fingerprint: 0x5dfe9a71
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [2e+00, 2e+00]
+Found heuristic solution: objective 298.0000000
+Variable types: 0 continuous, 946 integer (903 binary)
+
+Root relaxation: objective 1.290000e+02, 265 iterations, 0.01 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0     129.0000000  129.00000  0.00%     -    0s
+
+Explored 1 nodes (265 simplex iterations) in 0.03 seconds (0.00 work units)
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 129 298 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.290000000000e+02, best bound 1.290000000000e+02, gap 0.0000%
+
+Gurobi 9.5.1 (win64, Java) logging started Tue May 24 23:33:34 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 122 rows, 946 columns and 1885 nonzeros
+Model fingerprint: 0x23c8efa6
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 4e+01]
+Found heuristic solution: objective 294.0000000
+Variable types: 0 continuous, 946 integer (903 binary)
+
+Root relaxation: objective 1.290000e+02, 165 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0     129.0000000  129.00000  0.00%     -    0s
+
+Explored 1 nodes (165 simplex iterations) in 0.01 seconds (0.00 work units)
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 129 294 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.290000000000e+02, best bound 1.290000000000e+02, gap 0.0000%
+
+Gurobi 9.5.1 (win64, Java) logging started Tue May 24 23:34:05 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 122 rows, 946 columns and 1885 nonzeros
+Model fingerprint: 0x5171cda9
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 4e+01]
+Variable types: 0 continuous, 946 integer (903 binary)
+
+Root relaxation: objective 5.800000e+01, 151 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   58.00000    0    5          -   58.00000      -     -    0s
+     0     0   58.00000    0    3          -   58.00000      -     -    0s
+     0     0   58.50000    0    5          -   58.50000      -     -    0s
+     0     0   58.66667    0   22          -   58.66667      -     -    0s
+     0     0   59.00000    0   25          -   59.00000      -     -    0s
+     0     0   59.00000    0   19          -   59.00000      -     -    0s
+     0     0   59.00000    0   22          -   59.00000      -     -    0s
+     0     0   59.00000    0   22          -   59.00000      -     -    0s
+     0     2   60.00000    0   22          -   60.00000      -     -    0s
+
+Cutting planes:
+  Gomory: 1
+  Lift-and-project: 1
+  Clique: 2
+  Inf proof: 3
+  Zero half: 9
+
+Explored 3450 nodes (13427 simplex iterations) in 2.33 seconds (0.63 work units)
+Thread count was 4 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 9.5.1 (win64, Java) logging started Tue May 24 23:35:43 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 122 rows, 946 columns and 1885 nonzeros
+Model fingerprint: 0x23c8efa6
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 4e+01]
+Found heuristic solution: objective 294.0000000
+Variable types: 0 continuous, 946 integer (903 binary)
+
+Root relaxation: objective 1.290000e+02, 165 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0     129.0000000  129.00000  0.00%     -    0s
+
+Explored 1 nodes (165 simplex iterations) in 0.01 seconds (0.00 work units)
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 129 294 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.290000000000e+02, best bound 1.290000000000e+02, gap 0.0000%
+
+Gurobi 9.5.1 (win64, Java) logging started Tue May 24 23:44:51 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 122 rows, 946 columns and 1885 nonzeros
+Model fingerprint: 0x23c8efa6
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 4e+01]
+Found heuristic solution: objective 294.0000000
+Variable types: 0 continuous, 946 integer (903 binary)
+
+Root relaxation: objective 1.290000e+02, 165 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0     129.0000000  129.00000  0.00%     -    0s
+
+Explored 1 nodes (165 simplex iterations) in 0.01 seconds (0.00 work units)
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 129 294 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.290000000000e+02, best bound 1.290000000000e+02, gap 0.0000%
