@@ -49,9 +49,9 @@ public class Gurobi {
             //-------------------------------------VINCOLI---------------------------------------
 
             //vincoli per imporre l'attivazione di un solo link entrant e uscente
-            for(int i=0; i<43; i++){
+            for(int i=0; i<N_VERTICI; i++){
                 expr = new GRBLinExpr();
-                for(int j=43*i; j<43*i-i; j++){
+                for(int j=N_VERTICI*i; j<N_VERTICI*i-i; j++){
                     //if(vertici[j][0] == i || vertici[j][1] == i)
                     expr.addTerm(1,link[j]);
                 }
@@ -72,6 +72,15 @@ public class Gurobi {
                 expr.addTerm(1,u[i]);
                 model.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI, "limite superiore di " + N_VERTICI);
             }
+            //u[j] >= u[i] + 1 - (n-1)(1-xij) con i != j e i,j = 2...n
+            //svolgendo il calcolo: u[j] >= u[i] + 2 - n + xij(n-1)
+            for(int i=2; i<N_VERTICI-2; i++){
+                for(int j=i+1; j<N_VERTICI-i; j++){
+                    expr = new GRBLinExpr();
+                    expr.addTerm(1,u[i]);
+                    expr.addConstant(2-N_VERTICI+trovaCosto(i, j, vertici)*N_VERTICI-1);
+                }
+            }
 
 
             model.optimize();
@@ -79,6 +88,17 @@ public class Gurobi {
         }catch(GRBException e){
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
         }
+    }
+
+    public static int trovaCosto(int i, int j, int[][] vertici){
+
+        for(int x=0; x<N_VERTICI; x++){
+            for (int y=x*N_VERTICI; y<N_VERTICI*x-x; y++){
+                if(x == i && y == j)
+                    return vertici[i][j];
+            }
+        }
+        return 0;
     }
 
     public static void parsing_file(String file_name, int[][] vertici) throws IOException {
