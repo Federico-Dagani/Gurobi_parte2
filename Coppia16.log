@@ -1,0 +1,53 @@
+
+Gurobi 9.5.1 (win64, Java) logging started Mon May 23 17:22:11 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+
+Gurobi 9.5.1 (win64, Java) logging started Mon May 23 17:22:59 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+
+Gurobi 9.5.1 (win64, Java) logging started Mon May 23 17:25:44 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+
+Gurobi 9.5.1 (win64, Java) logging started Mon May 23 23:06:47 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+
+Gurobi 9.5.1 (win64, Java) logging started Mon May 23 23:25:11 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 43 rows, 903 columns and 0 nonzeros
+Model fingerprint: 0xfcb1da92
+Variable types: 0 continuous, 903 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds (0.00 work units)
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
