@@ -1,9 +1,6 @@
 import gurobi.*;
 import gurobi.GRB.IntParam;
 
-import static gurobi.GRB.IntAttr.NumIntVars;
-import static gurobi.GRB.IntAttr.VBasis;
-
 import java.io.*;
 import java.util.Arrays;
 
@@ -60,8 +57,8 @@ public class Gurobi {
             }
 
             //vincoli di Miller-Tucker-Zemil
-            expr = new GRBLinExpr();
             //u[1] = 1
+            expr = new GRBLinExpr();
             expr.addTerm(1,u[1]);
             model.addConstr(expr, GRB.EQUAL, 1, "assegnazione u[1]");
             //2 <= u[i] <= n
@@ -75,16 +72,22 @@ public class Gurobi {
             }
             //u[j] >= u[i] + 1 - (n-1)(1-xij) con i != j e i,j = 2...n
             //svolgendo il calcolo: u[j] >= u[i] + 2 - n + xij(n-1)
-            for(int i=2; i<N_VERTICI-2; i++){
-                for(int j=i+1; j<N_VERTICI-i; j++){
+            int c = 42;
+            for(int i=1; i<N_VERTICI-1; i++){
+                for(int j=i+1; j<N_VERTICI; j++){
                     expr = new GRBLinExpr();
                     expr.addTerm(1,u[i]);
-                    expr.addConstant(2-N_VERTICI+trovaCosto(i, j, vertici)*N_VERTICI-1);
+                    expr.addConstant(2-N_VERTICI);
+                    expr.addTerm(N_VERTICI-1, link[c]);
+                    c++;
+                    model.addConstr(expr, GRB.GREATER_EQUAL, u[j], "");
                 }
             }
             model.optimize();
 
-            System.out.printf("funzione obiettivo = %.4f\n", model.get(GRB.DoubleAttr.ObjVal));
+            System.out.printf("funzione obiettivo = %f\n", model.get(GRB.DoubleAttr.ObjVal));
+            for(GRBVar v: model.getVars())
+                System.out.println(v.get(GRB.StringAttr.VarName) + ": " + v.get(GRB.DoubleAttr.X));
 
         }catch(GRBException e){
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());

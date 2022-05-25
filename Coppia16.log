@@ -335,3 +335,157 @@ Solution count 2: 129 294
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 1.290000000000e+02, best bound 1.290000000000e+02, gap 0.0000%
+
+Gurobi 9.5.1 (win64, Java) logging started Wed May 25 10:47:08 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 983 rows, 946 columns and 4468 nonzeros
+Model fingerprint: 0x4f794ac2
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+01]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 4e+01]
+Variable types: 0 continuous, 946 integer (903 binary)
+
+Explored 0 nodes (0 simplex iterations) in 0.05 seconds (0.00 work units)
+Thread count was 4 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 9.5.1 (win64, Java) logging started Wed May 25 10:47:27 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 122 rows, 946 columns and 1885 nonzeros
+Model fingerprint: 0x23c8efa6
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 4e+01]
+Found heuristic solution: objective 294.0000000
+Variable types: 0 continuous, 946 integer (903 binary)
+
+Root relaxation: objective 1.290000e+02, 165 iterations, 0.01 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0     129.0000000  129.00000  0.00%     -    0s
+
+Explored 1 nodes (165 simplex iterations) in 0.02 seconds (0.00 work units)
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 129 294 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.290000000000e+02, best bound 1.290000000000e+02, gap 0.0000%
+
+Gurobi 9.5.1 (win64, Java) logging started Wed May 25 10:48:04 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 122 rows, 946 columns and 1885 nonzeros
+Model fingerprint: 0x23c8efa6
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 4e+01]
+Found heuristic solution: objective 294.0000000
+Variable types: 0 continuous, 946 integer (903 binary)
+
+Root relaxation: objective 1.290000e+02, 165 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0     129.0000000  129.00000  0.00%     -    0s
+
+Explored 1 nodes (165 simplex iterations) in 0.01 seconds (0.00 work units)
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 129 294 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.290000000000e+02, best bound 1.290000000000e+02, gap 0.0000%
+
+Gurobi 9.5.1 (win64, Java) logging started Wed May 25 10:50:03 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 122 rows, 946 columns and 1885 nonzeros
+Model fingerprint: 0x23c8efa6
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 4e+01]
+Found heuristic solution: objective 294.0000000
+Variable types: 0 continuous, 946 integer (903 binary)
+
+Root relaxation: objective 1.290000e+02, 165 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0     129.0000000  129.00000  0.00%     -    0s
+
+Explored 1 nodes (165 simplex iterations) in 0.01 seconds (0.00 work units)
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 129 294 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.290000000000e+02, best bound 1.290000000000e+02, gap 0.0000%
+
+Gurobi 9.5.1 (win64, Java) logging started Wed May 25 10:55:35 2022
+
+Set parameter Username
+Academic license - for non-commercial use only - expires 2023-02-25
+Set parameter Presolve to value 0
+Set parameter Method to value 0
+Gurobi Optimizer version 9.5.1 build v9.5.1rc2 (win64)
+Thread count: 2 physical cores, 4 logical processors, using up to 4 threads
+Optimize a model with 983 rows, 946 columns and 4468 nonzeros
+Model fingerprint: 0x481a0c66
+Variable types: 0 continuous, 946 integer (903 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+01]
+  Objective range  [2e+00, 1e+01]
+  Bounds range     [1e+00, 4e+01]
+  RHS range        [1e+00, 4e+01]
+Variable types: 0 continuous, 946 integer (903 binary)
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds (0.00 work units)
+Thread count was 4 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
