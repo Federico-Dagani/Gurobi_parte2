@@ -78,33 +78,38 @@ public class Gurobi {
             //vincoli di Miller-Tucker-Zemil
             //u[1] = 1
             expr = new GRBLinExpr();
-            expr.addTerm(1,u[1]);
+            expr.addTerm(1,u[0]);
             model.addConstr(expr, GRB.EQUAL, 1, "assegnazione u[1]");
             //2 <= u[i] <= n
-            for (int i=2; i<N_VERTICI-2; i++){   //i = 1; i< N_VERTICI-1
+            for (int i=1; i<N_VERTICI; i++){   //i = 1; i< N_VERTICI
                 expr = new GRBLinExpr();
                 expr.addTerm(1,u[i]);
-                model.addConstr(expr, GRB.GREATER_EQUAL, 2, "limite inferiore di 2");
+                model.addConstr(expr, GRB.GREATER_EQUAL, 1, "limite inferiore di 2"); //di 1?c'era 2 ma ho cambiato a 1
                 expr = new GRBLinExpr();
                 expr.addTerm(1,u[i]);
-                model.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI, "limite superiore di " + N_VERTICI);
+                model.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI-1, "limite superiore di " + (N_VERTICI-1));
             }
             //u[j] >= u[i] + 1 - (n-1)(1-xij) con i != j e i,j = 2...n
             //svolgendo il calcolo: u[j] >= u[i] + 2 - n + xij(n-1)
-            for(int i=1; i<N_VERTICI-1; i++){
+            for(int i=1; i<N_VERTICI; i++){
                 for(int j=i+1; j<N_VERTICI; j++){
                     expr = new GRBLinExpr();
-                    expr.addTerm(1,u[i]);
-                    expr.addConstant(2-N_VERTICI);
+                    //expr.addTerm(1,u[i]);
+                    //expr.addConstant(2-N_VERTICI);
+                    //expr.addTerm(N_VERTICI-1, Xij[i][j]);
+                    //model.addConstr(expr, GRB.GREATER_EQUAL, u[j], "");
+                    //provo a scrivere secondo wikipedia
+                    expr.addTerm(1, u[i]);
+                    expr.addTerm(-1, u[j]);
                     expr.addTerm(N_VERTICI-1, Xij[i][j]);
-                    model.addConstr(expr, GRB.GREATER_EQUAL, u[j], "");
+                    model.addConstr(expr,GRB.LESS_EQUAL, N_VERTICI-2, "");
                 }
             }
             model.optimize();
 
             System.out.printf("funzione obiettivo = %f\n", model.get(GRB.DoubleAttr.ObjVal));
-            for(GRBVar v: model.getVars())
-                System.out.println(v.get(GRB.StringAttr.VarName) + ": " + v.get(GRB.DoubleAttr.X));
+          //  for(GRBVar v: model.getVars())
+          //      System.out.println(v.get(GRB.StringAttr.VarName) + ": " + v.get(GRB.DoubleAttr.X));
 
         }catch(GRBException e){
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
