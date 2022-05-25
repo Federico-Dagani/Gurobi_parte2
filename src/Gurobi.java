@@ -7,13 +7,14 @@ import java.util.Arrays;
 public class Gurobi {
 
     private static final int N_VERTICI = 43;
-    private static final int LATI = (43*42/2);
+    //private static final int LATI = (43*42/2);
 
     public static void main(String[] args) throws IOException {
 
-        int[][] vertici = new int[903][3];
+        int[][] costi = new int[N_VERTICI][N_VERTICI];
+        //int[][] vertici = new int[903][3];
 
-        parsing_file("src/coppia16.txt", vertici);
+        parsing_file("src/coppia16.txt", costi);
 
         try{
 
@@ -25,9 +26,11 @@ public class Gurobi {
             GRBModel model = new GRBModel(env);
 
             //creazione variabili
-            GRBVar[] link = new GRBVar[LATI];
-            for(int l=0; l<LATI; l++) {
-                link[l] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "X " + l);
+            GRBVar[][] Xij = new GRBVar[N_VERTICI][N_VERTICI];
+            for(int i=0; i< N_VERTICI; i++){
+                for(int j=0; j< N_VERTICI; j++) {
+                    Xij[i][j] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "X_" + i + "_" + j);
+                }
             }
 
             GRBVar[] u = new GRBVar[N_VERTICI];
@@ -37,24 +40,40 @@ public class Gurobi {
             //---------------------------------------F.O.----------------------------------------
 
             GRBLinExpr expr = new GRBLinExpr();
-            for(int k=0; k<LATI; k++) {
-                expr.addTerm(vertici[k][2], link[k]);
+            for(int i=0; i< N_VERTICI; i++) {
+                for (int j = 0; j < N_VERTICI; j++) {
+                    expr.addTerm(costi[i][j], Xij[i][j]);
+                }
             }
             model.setObjective(expr);
             model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
 
             //-------------------------------------VINCOLI---------------------------------------
 
-            //vincoli per imporre l'attivazione di un solo link entrant e uscente
-            for(int i=0; i<N_VERTICI; i++){
+            //vincoli di assegnamento: per imporre l'attivazione di un solo link entrante e uscente
+
+            for(int i= 0; i< N_VERTICI; i++){
                 expr = new GRBLinExpr();
-                for(int j=0; j<LATI; j++){
-                    if(vertici[j][0] == i || vertici[j][1] == i)
-                    expr.addTerm(1,link[j]);
+                for(int j=0; j<N_VERTICI; j++){
+                    expr.addTerm(1, Xij[i][j]);
                 }
-                //metto expr = 2 perchè per ogni nodo devo avere 2 link attivi
-                model.addConstr(expr, GRB.EQUAL, 2, "una ed una sola entrata ed uscita per vertice");
+                model.addConstr(expr, GRB.EQUAL, 1, "una sola uscita per ogni vertice");
             }
+
+            for(int i= 0; i< N_VERTICI; i++){
+                expr = new GRBLinExpr();
+                for(int j=0; j<N_VERTICI; j++){
+                    expr.addTerm(1, Xij[j][i]);
+                }
+                model.addConstr(expr, GRB.EQUAL, 1, "una sola entrata per ogni vertice");
+            }
+
+            for(int i= 0; i< N_VERTICI; i++){
+                expr = new GRBLinExpr();
+                expr.addTerm(1, Xij[i][i]);
+                model.addConstr(expr, GRB.EQUAL, 0, "diagonale nulla");
+            }
+
 
             //vincoli di Miller-Tucker-Zemil
             //u[1] = 1
@@ -62,7 +81,7 @@ public class Gurobi {
             expr.addTerm(1,u[1]);
             model.addConstr(expr, GRB.EQUAL, 1, "assegnazione u[1]");
             //2 <= u[i] <= n
-            for (int i=2; i<N_VERTICI-2; i++){
+            for (int i=2; i<N_VERTICI-2; i++){   //i = 1; i< N_VERTICI-1
                 expr = new GRBLinExpr();
                 expr.addTerm(1,u[i]);
                 model.addConstr(expr, GRB.GREATER_EQUAL, 2, "limite inferiore di 2");
@@ -72,14 +91,12 @@ public class Gurobi {
             }
             //u[j] >= u[i] + 1 - (n-1)(1-xij) con i != j e i,j = 2...n
             //svolgendo il calcolo: u[j] >= u[i] + 2 - n + xij(n-1)
-            int c = 42;
             for(int i=1; i<N_VERTICI-1; i++){
                 for(int j=i+1; j<N_VERTICI; j++){
                     expr = new GRBLinExpr();
                     expr.addTerm(1,u[i]);
                     expr.addConstant(2-N_VERTICI);
-                    expr.addTerm(N_VERTICI-1, link[c]);
-                    c++;
+                    expr.addTerm(N_VERTICI-1, Xij[i][j]);
                     model.addConstr(expr, GRB.GREATER_EQUAL, u[j], "");
                 }
             }
@@ -94,36 +111,25 @@ public class Gurobi {
         }
     }
 
-    public static int trovaCosto(int i, int j, int[][] vertici){
-
-        for(int x=0; x<N_VERTICI; x++){
-            for (int y=x*N_VERTICI; y<N_VERTICI*x-x; y++){
-                if(x == i && y == j)
-                    return vertici[i][j];
-            }
-        }
-        return 0;
-    }
-
-    public static void parsing_file(String file_name, int[][] vertici) throws IOException {
+    public static void parsing_file(String file_name, int[][] costi) throws IOException {
 
         File file = new File(file_name);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String lettura;
         boolean start_parse = false;
-        int i = 0;
 
         while((lettura = br.readLine()) != null){
             if(start_parse){
-                int[] vertice = Arrays.stream(lettura.split(" ")).mapToInt(Integer::parseInt).toArray();
-                vertici[i][0] = vertice[0];
-                vertici[i][1] = vertice[1];
-                vertici[i][2] = vertice[2];
-                i++;
+                int[] numeri_letti = Arrays.stream(lettura.split(" ")).mapToInt(Integer::parseInt).toArray();
+                costi[numeri_letti[0]][numeri_letti[1]] = costi[numeri_letti[1]][numeri_letti[0]]= numeri_letti[2];
             }
             if(lettura.equals("Vertici 43")){
                 start_parse = true;
             }
+        }
+        //imposto la diagonale della matrice pari a 0; il costo da un nodo a sè stesso è pari a 0.
+        for(int i= 0; i < N_VERTICI; i++){
+            costi[i][i] = 0;
         }
     }
 }
