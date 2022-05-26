@@ -2,7 +2,10 @@ import gurobi.*;
 import gurobi.GRB.IntParam;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Gurobi {
 
@@ -67,11 +70,22 @@ public class Gurobi {
                 }
                 model.addConstr(expr, GRB.EQUAL, 1, "una sola entrata per ogni vertice");
             }
-
+            //aggiungo N vincoli che impongano che il ciclo non si fermi in un nodo
             for(int i= 0; i< N_VERTICI; i++){
                 expr = new GRBLinExpr();
                 expr.addTerm(1, Xij[i][i]);
                 model.addConstr(expr, GRB.EQUAL, 0, "diagonale nulla");
+            }
+
+            //aggiungo N*(N-1)/2 che impongano che il verso entrante e il verso uscente per ogni Xij non sia il medesimo
+            //scorro la triangolare superiore della matrice
+            for(int i = 0; i< N_VERTICI-1; i++){
+                for(int j = i+1; j<N_VERTICI; j++){
+                    expr = new GRBLinExpr();
+                    expr.addTerm(1, Xij[i][j]);
+                    expr.addTerm(1, Xij[j][i]);
+                    model.addConstr(expr, GRB.LESS_EQUAL, 1, "al più un collegamento attivo tra due nodi(non entrambi andata e ritorno)");
+                }
             }
 
 
@@ -91,25 +105,53 @@ public class Gurobi {
             }
             //u[j] >= u[i] + 1 - (n-1)(1-xij) con i != j e i,j = 2...n
             //svolgendo il calcolo: u[j] >= u[i] + 2 - n + xij(n-1)
-            for(int i=1; i<N_VERTICI; i++){
+            for(int i=0; i<N_VERTICI-1; i++){
                 for(int j=i+1; j<N_VERTICI; j++){
                     expr = new GRBLinExpr();
                     //expr.addTerm(1,u[i]);
                     //expr.addConstant(2-N_VERTICI);
                     //expr.addTerm(N_VERTICI-1, Xij[i][j]);
                     //model.addConstr(expr, GRB.GREATER_EQUAL, u[j], "");
+
                     //provo a scrivere secondo wikipedia
-                    expr.addTerm(1, u[i]);
+                    //expr.addTerm(1, u[i]);
+                    //expr.addTerm(-1, u[j]);
+                    //expr.addTerm(N_VERTICI-1, Xij[i][j]);
+                    //model.addConstr(expr,GRB.LESS_EQUAL, N_VERTICI-2, "");
+
+                    //provo a scivere secondo me
+                    expr.addTerm(N_VERTICI-2, Xij[i][j]);
                     expr.addTerm(-1, u[j]);
-                    expr.addTerm(N_VERTICI-1, Xij[i][j]);
-                    model.addConstr(expr,GRB.LESS_EQUAL, N_VERTICI-2, "");
+                    expr.addTerm(1, u[i]);
+                    model.addConstr(expr, GRB.LESS_EQUAL, 40, "");
                 }
             }
             model.optimize();
 
+            // STAMPA A VIDEO
+            System.out.println("GRUPPO <coppia 16>");
+            System.out.println("Componenti: <Bresciani Simone> <Dagani Federico>\n");
+
+            System.out.println("QUESITO I:");
             System.out.printf("funzione obiettivo = %f\n", model.get(GRB.DoubleAttr.ObjVal));
-          //  for(GRBVar v: model.getVars())
-          //      System.out.println(v.get(GRB.StringAttr.VarName) + ": " + v.get(GRB.DoubleAttr.X));
+            //for(GRBVar v: model.getVars())
+            //System.out.println(v.get(GRB.StringAttr.VarName) + ": " + v.get(GRB.DoubleAttr.X));
+
+            ArrayList<Integer> ciclo = new ArrayList<>();
+            int precedente=0;
+            ciclo.add(precedente);
+            for(int i=0; i<N_VERTICI; i++){
+                for(int k= 0; k< N_VERTICI; k++) {
+                    if (Xij[precedente][k].get(GRB.DoubleAttr.X) == 1) {
+                        ciclo.add(k);
+                        precedente=k;
+                        break;
+                    }
+                }
+            }
+            //ciclo.add(0);
+            System.out.print("ciclo ottimo 1: ");
+            System.out.println(ciclo);
 
         }catch(GRBException e){
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
