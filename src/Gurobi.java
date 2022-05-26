@@ -123,7 +123,7 @@ public class Gurobi {
                     expr.addTerm(N_VERTICI-2, Xij[i][j]);
                     expr.addTerm(-1, u[j]);
                     expr.addTerm(1, u[i]);
-                    model.addConstr(expr, GRB.LESS_EQUAL, 40, "");
+                    model.addConstr(expr, GRB.LESS_EQUAL, 39, "");
                 }
             }
             model.optimize();
