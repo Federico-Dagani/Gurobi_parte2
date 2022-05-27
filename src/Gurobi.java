@@ -83,6 +83,7 @@ public class Gurobi {
                 model.addConstr(expr, GRB.EQUAL, 1, "una sola entrata per ogni vertice");
             }
             //aggiungo N vincoli che impongano che il ciclo non si fermi in un nodo
+
             for(int i= 0; i< N_VERTICI; i++){
                 expr = new GRBLinExpr();
                 expr.addTerm(1, Xij[i][i]);
@@ -100,7 +101,6 @@ public class Gurobi {
                 }
             }
 
-
             //vincoli di Miller-Tucker-Zemil
             //u[1] = 1
             expr = new GRBLinExpr();
@@ -110,30 +110,22 @@ public class Gurobi {
             for (int i=1; i<N_VERTICI; i++){   //i = 1; i< N_VERTICI
                 expr = new GRBLinExpr();
                 expr.addTerm(1,u[i]);
-                model.addConstr(expr, GRB.GREATER_EQUAL, 1, "limite inferiore di 2"); //di 1?c'era 2 ma ho cambiato a 1
+                model.addConstr(expr, GRB.GREATER_EQUAL, 2, "limite inferiore di 2"); //di 1?c'era 2 ma ho cambiato a 1
                 expr = new GRBLinExpr();
                 expr.addTerm(1,u[i]);
-                model.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI-1, "limite superiore di " + (N_VERTICI-1));
+                model.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI, "limite superiore di " + (N_VERTICI-1));
             }
             //u[j] >= u[i] + 1 - (n-1)(1-xij) con i != j e i,j = 2...n
             //svolgendo il calcolo: u[j] >= u[i] + 2 - n + xij(n-1)
-            for(int i=0; i<N_VERTICI-1; i++){
-                for(int j=i+1; j<N_VERTICI; j++){
+            for(int i=1; i<N_VERTICI-1; i++){
+                for(int j=1; j<N_VERTICI; j++){
                     expr = new GRBLinExpr();
-                    //expr.addTerm(1,u[i]);
-                    //expr.addConstant(2-N_VERTICI);
-                    //expr.addTerm(N_VERTICI-1, Xij[i][j]);
-                    //model.addConstr(expr, GRB.GREATER_EQUAL, u[j], "");
-
-                    //expr.addTerm(1, u[i]);
-                    //expr.addTerm(-1, u[j]);
-                    //expr.addTerm(N_VERTICI-1, Xij[i][j]);
-                    //model.addConstr(expr,GRB.LESS_EQUAL, N_VERTICI-2, "");
-
-                    expr.addTerm(N_VERTICI-2, Xij[i][j]);
-                    expr.addTerm(-1, u[j]);
-                    expr.addTerm(1, u[i]);
-                    model.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI-4, "");
+                    if(i!=j) {
+                        expr.addTerm((N_VERTICI - 1) - 1 , Xij[i][j]);
+                        expr.addTerm(-1, u[j]);
+                        expr.addTerm(1, u[i]);
+                        model.addConstr(expr, GRB.LESS_EQUAL, (N_VERTICI- 1) - 2 , "");
+                    }
                 }
             }
 
@@ -154,25 +146,22 @@ public class Gurobi {
                     }
                 }
             }
-            System.out.print("ciclo ottimo 1: ");
-            System.out.println(ciclo);
-            System.out.printf("\n\n\n\n\n\n\n");
 
             //-----------------QUESITO II------------------------
 
-            //aggiungo il vincolo che impone il raggiungimento dello stesso risultato della funzione obiettivo del quesito 1
-
+            //creo un nuovo modello identico e aggiungo il vincolo che impone il raggiungimento
+            // dello stesso risultato della funzione obiettivo del quesito 1
 
             GRBModel model2 = new GRBModel(env);
             //creazione variabili
-             Xij = new GRBVar[N_VERTICI][N_VERTICI];
+            Xij = new GRBVar[N_VERTICI][N_VERTICI];
             for(int i=0; i< N_VERTICI; i++){
                 for(int j=0; j< N_VERTICI; j++) {
                     Xij[i][j] = model2.addVar(0.0, 1.0, 0.0, GRB.BINARY, "X_" + i + "_" + j);
                 }
             }
 
-             u = new GRBVar[N_VERTICI];
+            u = new GRBVar[N_VERTICI];
             for (int m=0; m<N_VERTICI; m++){
                 u[m] = model2.addVar(0.0, 43.0, 0.0, GRB.INTEGER, "u "+ u);
             }
@@ -207,18 +196,6 @@ public class Gurobi {
                 }
                 model2.addConstr(expr, GRB.EQUAL, 1, "una sola entrata per ogni vertice");
             }
-            expr = new GRBLinExpr();
-            expr.addTerm(1,u[0]);
-            model2.addConstr(expr, GRB.EQUAL, 1, "assegnazione u[1]");
-            //2 <= u[i] <= n
-            for (int i=1; i<N_VERTICI; i++){   //i = 1; i< N_VERTICI
-                expr = new GRBLinExpr();
-                expr.addTerm(1,u[i]);
-                model2.addConstr(expr, GRB.GREATER_EQUAL, 1, "limite inferiore di 2"); //di 1?c'era 2 ma ho cambiato a 1
-                expr = new GRBLinExpr();
-                expr.addTerm(1,u[i]);
-                model2.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI-1, "limite superiore di " + (N_VERTICI-1));
-            }
             for(int i= 0; i< N_VERTICI; i++){
                 expr = new GRBLinExpr();
                 expr.addTerm(1, Xij[i][i]);
@@ -235,25 +212,31 @@ public class Gurobi {
                     model2.addConstr(expr, GRB.LESS_EQUAL, 1, "al più un collegamento attivo tra due nodi(non entrambi andata e ritorno)");
                 }
             }
+            //vincoli di Miller-Tucker-Zemil
+            //u[1] = 1
+            expr = new GRBLinExpr();
+            expr.addTerm(1,u[0]);
+            model2.addConstr(expr, GRB.EQUAL, 1, "assegnazione u[1]");
+            //2 <= u[i] <= n
+            for (int i=1; i<N_VERTICI; i++){   //i = 1; i< N_VERTICI
+                expr = new GRBLinExpr();
+                expr.addTerm(1,u[i]);
+                model2.addConstr(expr, GRB.GREATER_EQUAL, 2, "limite inferiore di 2"); //di 1?c'era 2 ma ho cambiato a 1
+                expr = new GRBLinExpr();
+                expr.addTerm(1,u[i]);
+                model2.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI, "limite superiore di " + N_VERTICI);
+            }
             //u[j] >= u[i] + 1 - (n-1)(1-xij) con i != j e i,j = 2...n
             //svolgendo il calcolo: u[j] >= u[i] + 2 - n + xij(n-1)
-            for(int i=0; i<N_VERTICI-1; i++){
-                for(int j=i+1; j<N_VERTICI; j++){
+            for(int i=1; i<N_VERTICI-1; i++){
+                for(int j=1; j<N_VERTICI; j++){
                     expr = new GRBLinExpr();
-                    //expr.addTerm(1,u[i]);
-                    //expr.addConstant(2-N_VERTICI);
-                    //expr.addTerm(N_VERTICI-1, Xij[i][j]);
-                    //model.addConstr(expr, GRB.GREATER_EQUAL, u[j], "");
-
-                    //expr.addTerm(1, u[i]);
-                    //expr.addTerm(-1, u[j]);
-                    //expr.addTerm(N_VERTICI-1, Xij[i][j]);
-                    //model.addConstr(expr,GRB.LESS_EQUAL, N_VERTICI-2, "");
-
-                    expr.addTerm(N_VERTICI-2, Xij[i][j]);
-                    expr.addTerm(-1, u[j]);
-                    expr.addTerm(1, u[i]);
-                    model2.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI-4, "");
+                    if(i!=j) {
+                        expr.addTerm(N_VERTICI - 1 - 1 , Xij[i][j]);
+                        expr.addTerm(-1, u[j]);
+                        expr.addTerm(1, u[i]);
+                        model2.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI - 2 - 1, "");
+                    }
                 }
             }
 
@@ -281,12 +264,12 @@ public class Gurobi {
                 }
             }
 
-            //-------------------QUESITO III------------------------------
+            //-----------------------QUESITO III--------------------------
 
 
 
 
-            // STAMPA A VIDEO
+            //---------------------STAMPA A VIDEO-------------------------
             System.out.printf("\n\n\n");
             System.out.println("GRUPPO <coppia 16>");
             System.out.println("Componenti: <Bresciani Simone> <Dagani Federico>\n");
@@ -324,4 +307,11 @@ public class Gurobi {
             costi[i][i] = 0;
         }
     }
+
+    public static void imposta_modello_base(GRBModel model, ArrayList<Integer> ciclo, double funzione_obiettivo){
+
+    }
+
+
+
 }
