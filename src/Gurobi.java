@@ -263,11 +263,122 @@ public class Gurobi {
                 }
             }
 
-            //-----------------------QUESITO III--------------------------
+            //-----------------------------------QUESITO III---------------------------------
 
+            //creo un nuovo modello identico al modello 1 e scrivo i vincoli aggiuntivi
+            GRBModel model3 = new GRBModel(env);
+            //creazione variabili
+            Xij = new GRBVar[N_VERTICI][N_VERTICI];
+            for(int i=0; i< N_VERTICI; i++){
+                for(int j=0; j< N_VERTICI; j++) {
+                    Xij[i][j] = model3.addVar(0.0, 1.0, 0.0, GRB.BINARY, "X_" + i + "_" + j);
+                }
+            }
+            u = new GRBVar[N_VERTICI];
+            for (int m=0; m<N_VERTICI; m++){
+                u[m] = model3.addVar(0.0, 43.0, 0.0, GRB.INTEGER, "u "+ u);
+            }
 
+            //---------------------------------------F.O.----------------------------------------
 
+            expr = new GRBLinExpr();
+            for(int i=0; i< N_VERTICI; i++) {
+                for (int j = 0; j < N_VERTICI; j++) {
+                    expr.addTerm(costi[i][j], Xij[i][j]);
+                }
+            }
+            model3.setObjective(expr);
+            model3.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
 
+            //----------------------------------------VINCOLI--------------------------------------
+
+            //stessi vincoli del modello 1
+            for(int i= 0; i< N_VERTICI; i++){
+                expr = new GRBLinExpr();
+                for(int j=0; j<N_VERTICI; j++){
+                    expr.addTerm(1, Xij[i][j]);
+                }
+                model3.addConstr(expr, GRB.EQUAL, 1, "una sola uscita per ogni vertice");
+            }
+            for(int i= 0; i< N_VERTICI; i++){
+                expr = new GRBLinExpr();
+                for(int j=0; j<N_VERTICI; j++){
+                    expr.addTerm(1, Xij[j][i]);
+                }
+                model3.addConstr(expr, GRB.EQUAL, 1, "una sola entrata per ogni vertice");
+            }
+            for(int i= 0; i< N_VERTICI; i++){
+                expr = new GRBLinExpr();
+                expr.addTerm(1, Xij[i][i]);
+                model3.addConstr(expr, GRB.EQUAL, 0, "diagonale nulla");
+            }
+            for(int i = 0; i< N_VERTICI-1; i++){
+                for(int j = i+1; j<N_VERTICI; j++){
+                    expr = new GRBLinExpr();
+                    expr.addTerm(1, Xij[i][j]);
+                    expr.addTerm(1, Xij[j][i]);
+                    model3.addConstr(expr, GRB.LESS_EQUAL, 1, "al più un collegamento attivo tra due nodi(non entrambi andata e ritorno)");
+                }
+            }
+            expr = new GRBLinExpr();
+            expr.addTerm(1,u[0]);
+            model3.addConstr(expr, GRB.EQUAL, 1, "assegnazione u[1]");
+            for (int i=1; i<N_VERTICI; i++){
+                expr = new GRBLinExpr();
+                expr.addTerm(1,u[i]);
+                model3.addConstr(expr, GRB.GREATER_EQUAL, 2, "limite inferiore di 2");
+                expr = new GRBLinExpr();
+                expr.addTerm(1,u[i]);
+                model3.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI, "limite superiore di " + N_VERTICI);
+            }
+            for(int i=1; i<N_VERTICI-1; i++){
+                for(int j=1; j<N_VERTICI; j++){
+                    expr = new GRBLinExpr();
+                    if(i!=j) {
+                        expr.addTerm((N_VERTICI - 1) - 1 , Xij[i][j]);
+                        expr.addTerm(-1, u[j]);
+                        expr.addTerm(1, u[i]);
+                        model3.addConstr(expr, GRB.LESS_EQUAL, (N_VERTICI - 1) - 2 , "vincolo di sequenzialità delle variabili u");
+                    }
+                }
+            }
+
+            //VINCOLI AGGIUNTIVI
+            //il costo dei lati incidenti a v sia al massimo il a% del costo totale del ciclo
+            int costo_lati_incidenti = 0;
+            expr = new GRBLinExpr();
+            for(int i=0; i< N_VERTICI; i++) {
+                for (int j = 0; j < N_VERTICI; j++) {
+                    expr.addTerm(a/100*costi[i][j], Xij[i][j]);
+                    if(Xij[v][j].get(GRB.DoubleAttr.X)==1)
+                        costo_lati_incidenti+=costi[v][j];
+                    if(Xij[i][v].get(GRB.DoubleAttr.X)==1)
+                        costo_lati_incidenti+=costi[i][v];
+                }
+            }
+            model3.addConstr(expr, GRB.GREATER_EQUAL, costo_lati_incidenti, "il costo dei lati incidenti a v sia al massimo il a% del costo")
+/**
+            //se il lato (b1,b2) viene percorso, il costo del ciclo ottimo sia inferiore a c
+            if(Xij[b1][b2].get(GRB.DoubleAttr.X)==1 || Xij[b2][b1].get(GRB.DoubleAttr.X)==1){
+                expr = new GRBLinExpr();
+                for(int i=0; i< N_VERTICI; i++) {
+                    for (int j = 0; j < N_VERTICI; j++) {
+                        expr.addTerm(costi[i][j], Xij[i][j]);
+                    }
+                }
+                model3.addConstr(expr, GRB.LESS_EQUAL, c,"se il lato b1 b2 viene percorso, il costo del ciclo sia inferiore a c")
+            }
+
+            //il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)
+            if(Xij[e1][e2].get(GRB.DoubleAttr.X)==0 || Xij[f1][f2].get(GRB.DoubleAttr.X)==1){
+                expr = new GRBLinExpr();
+                expr.addTerm(1,Xij[d1][d2]);
+                model3.addConstr(expr, GRB.EQUAL, 0,"lato d percorribile se e solo se sono percorsi anche i lati f ed e");
+            }
+
+            //nel caso in cui i lati (g1, g2), (h1, h2) e (i1, i2) vengano tutti percorsi, si debba pagare un costo aggiuntivo pari a l.
+            if(Xij[e1][e2].get(GRB.DoubleAttr.X)==0)
+**/
             //---------------------STAMPA A VIDEO-------------------------
             System.out.printf("\n\n\n");
             System.out.println("GRUPPO <coppia 16>");
