@@ -356,7 +356,7 @@ public class Gurobi {
                         costo_lati_incidenti+=costi[i][v];
                 }
             }
-            model3.addConstr(expr, GRB.GREATER_EQUAL, costo_lati_incidenti, "il costo dei lati incidenti a v sia al massimo il a% del costo")
+            model3.addConstr(expr, GRB.GREATER_EQUAL, costo_lati_incidenti, "il costo dei lati incidenti a v sia al massimo il a% del costo");
 /**
             //se il lato (b1,b2) viene percorso, il costo del ciclo ottimo sia inferiore a c
             if(Xij[b1][b2].get(GRB.DoubleAttr.X)==1 || Xij[b2][b1].get(GRB.DoubleAttr.X)==1){
