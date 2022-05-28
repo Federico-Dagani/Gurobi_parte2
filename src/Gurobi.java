@@ -8,6 +8,7 @@ import java.util.Arrays;
 public class Gurobi {
 
     private static final int N_VERTICI = 43;
+    private static final int M = 200;
 
     public static void main(String[] args) throws IOException {
         //lettura file txt
@@ -314,6 +315,63 @@ public class Gurobi {
 
             //----------------------------------------VINCOLI--------------------------------------
 
+            //VINCOLI AGGIUNTIVI
+            //il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)
+            //2*Xij[d1][d2] - Xij[e1][e2] - Xij[f1][f2] <= 0
+            expr = new GRBLinExpr();
+            expr.addTerm(2,Xij[d1][d2]);
+            expr.addTerm(2, Xij[d2][d1]);
+            expr.addTerm(-1,Xij[f1][f2]);
+            expr.addTerm(-1,Xij[f2][f1]);
+            expr.addTerm(-1,Xij[e1][e2]);
+            expr.addTerm(-1,Xij[e2][e1]);
+            model3.addConstr(expr, GRB.LESS_EQUAL, 0, "il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)");
+
+            //il costo dei lati incidenti a v sia al massimo il a% del costo totale del ciclo
+            expr = new GRBLinExpr();
+            for(int i=0; i< N_VERTICI; i++){
+                expr.addTerm(costi[i][v], Xij[i][v]);
+            }
+            for(int j=0; j< N_VERTICI; j++){
+                expr.addTerm(costi[v][j], Xij[v][j]);
+            }
+            for(int i=0; i< N_VERTICI; i++) {
+                for (int j = 0; j < N_VERTICI; j++) {
+                    expr.addTerm(-costi[i][j]*a/100, Xij[i][j]);
+                    //expr.addTerm(costi[i][v], Xij[i][v]);
+                    //expr.addTerm(costi[v][j], Xij[v][j]);
+                }
+            }
+            model3.addConstr(expr, GRB.LESS_EQUAL, 0 , "il costo dei lati incidenti a v sia al massimo il a% del costo");
+
+            //se il lato (b1,b2) viene percorso, il costo del ciclo ottimo sia inferiore a c
+            //utilizzo il valore M abbastanza stringente per creare un vincolo disgiuntivo
+            expr = new GRBLinExpr();
+            for(int i=0; i< N_VERTICI; i++) {
+                for (int j = 0; j < N_VERTICI; j++) {
+                    expr.addTerm(costi[i][j], Xij[i][j]);
+                }
+            }
+            expr.addTerm(-c, Xij[b1][b2]);
+            expr.addTerm(-c, Xij[b2][b1]);
+            expr.addTerm(M, Xij[b1][b2]);
+            expr.addTerm(M, Xij[b2][b1]);
+            model3.addConstr(expr, GRB.LESS_EQUAL, M,"se il lato b1 b2 viene percorso, il costo del ciclo sia inferiore a c");
+
+
+
+            //nel caso in cui i lati (g1, g2), (h1, h2) e (i1, i2) vengano tutti percorsi, si debba pagare un costo aggiuntivo pari a l.
+            expr = new GRBLinExpr();
+            for(int i=0; i< N_VERTICI; i++) {
+                for (int j = 0; j < N_VERTICI; j++) {
+                    expr.addTerm(costi[i][j], Xij[i][j]);
+                    expr.addTerm(-costi[i][j], Xij[i][j]);
+                }
+            }
+            //model3.addConstr(expr, GRB.EQUAL, l,"se i lati g, h, i vengono tutti percorsi, si deve pagare un costo aggiuntivo l");
+
+
+
             //stessi vincoli del modello 1
             for(int i= 0; i< N_VERTICI; i++){
                 expr = new GRBLinExpr();
@@ -364,44 +422,7 @@ public class Gurobi {
                     }
                 }
             }
-            /**
-            //VINCOLI AGGIUNTIVI
-            //il costo dei lati incidenti a v sia al massimo il a% del costo totale del ciclo
-            int costo_lati_incidenti = 0;
-            expr = new GRBLinExpr();
-            for(int i=0; i< N_VERTICI; i++) {
-                for (int j = 0; j < N_VERTICI; j++) {
-                    expr.addTerm((a/100)*costi[i][j], Xij[i][j]);
-                    if(Xij[v][j].get(GRB.DoubleAttr.X)==1)
-                        costo_lati_incidenti+=costi[v][j];
-                    if(Xij[i][v].get(GRB.DoubleAttr.X)==1)
-                        costo_lati_incidenti+=costi[i][v];
-                }
-            }
-            model3.addConstr(expr, GRB.GREATER_EQUAL, costo_lati_incidenti, "il costo dei lati incidenti a v sia al massimo il a% del costo");
 
-            //se il lato (b1,b2) viene percorso, il costo del ciclo ottimo sia inferiore a c
-            if(Xij[b1][b2].get(GRB.DoubleAttr.X)==1 || Xij[b2][b1].get(GRB.DoubleAttr.X)==1){
-                expr = new GRBLinExpr();
-                for(int i=0; i< N_VERTICI; i++) {
-                    for (int j = 0; j < N_VERTICI; j++) {
-                        expr.addTerm(costi[i][j], Xij[i][j]);
-                    }
-                }
-                model3.addConstr(expr, GRB.LESS_EQUAL, c,"se il lato b1 b2 viene percorso, il costo del ciclo sia inferiore a c");
-            }
-            **/
-            //il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)
-            //2*Xij[d1][d2] - Xij[e1][e2] - Xij[f1][f2] <= 0
-            expr = new GRBLinExpr();
-            expr.addTerm(2,Xij[d1][d2]);
-            expr.addTerm(-1,Xij[f1][f2]);
-            expr.addTerm(-1,Xij[e1][e2]);
-            model3.addConstr(expr, GRB.LESS_EQUAL, 0, "il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)");
-            /**
-            //nel caso in cui i lati (g1, g2), (h1, h2) e (i1, i2) vengano tutti percorsi, si debba pagare un costo aggiuntivo pari a l.
-            //if(Xij[e1][e2].get(GRB.DoubleAttr.X)==0)
-            **/
             //ottimizzazione
             model3.optimize();
 
@@ -413,6 +434,14 @@ public class Gurobi {
 
             stampa_finale((int)funzione_obiettivo_1, ciclo1, ciclo2, (int)funzione_obiettivo_3, ciclo3);
 
+            /**
+            for(int i=0; i< N_VERTICI; i++){
+                for(int j=0; j<N_VERTICI; j++){
+                    System.out.printf("[%d]", (int)Xij[i][j].get(GRB.DoubleAttr.X));
+
+                }
+                System.out.println();
+            }**/
         }catch(GRBException e){
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
         }
