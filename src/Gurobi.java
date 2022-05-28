@@ -11,6 +11,47 @@ public class Gurobi {
 
     public static void main(String[] args) throws IOException {
         //lettura file txt
+         /** //gruppo68
+         int v = 13;
+         int a = 5;
+         int b1 = 15;
+         int b2 = 5;
+         int c = 134;
+         int d1 = 27;
+         int d2 = 36;
+         int e1 = 11;
+         int e2 = 5;
+         int f1 = 34;
+         int f2 = 38;
+         int g1 = 46;
+         int g2 = 0;
+         int h1 = 0;
+         int h2 = 32;
+         int i1  = 4;
+         int i2 = 21;
+         int l = 3;
+        **/
+        /** //gruppo25
+        int v = 2;
+        int a = 7;
+        int b1 = 6;
+        int b2 = 25;
+        int c = 114;
+        int d1 = 36;
+        int d2 = 1;
+        int e1 = 13;
+        int e2 = 10;
+        int f1 = 32;
+        int f2 = 2;
+        int g1 = 2;
+        int g2 = 8;
+        int h1 = 16;
+        int h2 = 39;
+        int i1  = 7;
+        int i2 = 9;
+        int l = 2;
+        **/
+        //gruppo16
         int v = 34;
         int a = 9;
         int b1 = 13;
@@ -29,8 +70,11 @@ public class Gurobi {
         int i1  = 10;
         int i2 = 7;
         int l = 7;
+
+        String file_name = "src/coppia16.txt";
+
         int[][] costi = new int[N_VERTICI][N_VERTICI];
-        parsing_file("src/coppia16.txt", costi);
+        parsing_file(file_name, costi);
 
         try{
 
@@ -54,7 +98,7 @@ public class Gurobi {
             //creazione variabili u di supporto
             GRBVar[] u = new GRBVar[N_VERTICI];
             for (int m=0; m<N_VERTICI; m++){
-                u[m] = model.addVar(0.0, 43.0, 0.0, GRB.INTEGER, "u "+ u);
+                u[m] = model.addVar(0.0, N_VERTICI, 0.0, GRB.INTEGER, "u "+ u);
             }
 
             //---------------------------------------F.O.----------------------------------------
@@ -137,22 +181,11 @@ public class Gurobi {
             //ottimizzazione modello gurobi
             model.optimize();
 
-            //salvataggio del valore della funzione obiettivo
+            //salvataggio e display del valore della funzione obiettivo
             double funzione_obiettivo_1 = model.get(GRB.DoubleAttr.ObjVal);
 
             //calcolo ciclo modello 1
-            ArrayList<Integer> ciclo = new ArrayList<>();
-            int precedente=0;
-            ciclo.add(precedente);
-            for(int i=0; i<N_VERTICI; i++){
-                for(int k= 0; k< N_VERTICI; k++) {
-                    if (Xij[precedente][k].get(GRB.DoubleAttr.X) == 1) {
-                        ciclo.add(k);
-                        precedente=k;
-                        break;
-                    }
-                }
-            }
+            ArrayList<Integer> ciclo1 = calcola_ciclo(Xij);
 
             //-------------------------------------QUESITO II---------------------------------------
 
@@ -169,7 +202,7 @@ public class Gurobi {
             }
             u = new GRBVar[N_VERTICI];
             for (int m=0; m<N_VERTICI; m++){
-                u[m] = model2.addVar(0.0, 43.0, 0.0, GRB.INTEGER, "u "+ u);
+                u[m] = model2.addVar(0.0, N_VERTICI, 0.0, GRB.INTEGER, "u "+ u);
             }
 
             //---------------------------------------F.O.----------------------------------------
@@ -250,18 +283,7 @@ public class Gurobi {
             model2.optimize();
 
             //calcolo ciclo 2
-            ArrayList<Integer> ciclo2 = new ArrayList<>();
-            precedente=0;
-            ciclo2.add(precedente);
-            for(int i=0; i<N_VERTICI; i++){
-                for(int k= 0; k< N_VERTICI; k++) {
-                    if (Xij[precedente][k].get(GRB.DoubleAttr.X) == 1) {
-                        ciclo2.add(k);
-                        precedente=k;
-                        break;
-                    }
-                }
-            }
+            ArrayList<Integer> ciclo2 = calcola_ciclo(Xij);
 
             //-----------------------------------QUESITO III---------------------------------
 
@@ -276,7 +298,7 @@ public class Gurobi {
             }
             u = new GRBVar[N_VERTICI];
             for (int m=0; m<N_VERTICI; m++){
-                u[m] = model3.addVar(0.0, 43.0, 0.0, GRB.INTEGER, "u "+ u);
+                u[m] = model3.addVar(0.0, N_VERTICI, 0.0, GRB.INTEGER, "u "+ u);
             }
 
             //---------------------------------------F.O.----------------------------------------
@@ -342,14 +364,14 @@ public class Gurobi {
                     }
                 }
             }
-
+            /**
             //VINCOLI AGGIUNTIVI
             //il costo dei lati incidenti a v sia al massimo il a% del costo totale del ciclo
             int costo_lati_incidenti = 0;
             expr = new GRBLinExpr();
             for(int i=0; i< N_VERTICI; i++) {
                 for (int j = 0; j < N_VERTICI; j++) {
-                    expr.addTerm(a/100*costi[i][j], Xij[i][j]);
+                    expr.addTerm((a/100)*costi[i][j], Xij[i][j]);
                     if(Xij[v][j].get(GRB.DoubleAttr.X)==1)
                         costo_lati_incidenti+=costi[v][j];
                     if(Xij[i][v].get(GRB.DoubleAttr.X)==1)
@@ -357,7 +379,7 @@ public class Gurobi {
                 }
             }
             model3.addConstr(expr, GRB.GREATER_EQUAL, costo_lati_incidenti, "il costo dei lati incidenti a v sia al massimo il a% del costo");
-/**
+
             //se il lato (b1,b2) viene percorso, il costo del ciclo ottimo sia inferiore a c
             if(Xij[b1][b2].get(GRB.DoubleAttr.X)==1 || Xij[b2][b1].get(GRB.DoubleAttr.X)==1){
                 expr = new GRBLinExpr();
@@ -366,30 +388,30 @@ public class Gurobi {
                         expr.addTerm(costi[i][j], Xij[i][j]);
                     }
                 }
-                model3.addConstr(expr, GRB.LESS_EQUAL, c,"se il lato b1 b2 viene percorso, il costo del ciclo sia inferiore a c")
+                model3.addConstr(expr, GRB.LESS_EQUAL, c,"se il lato b1 b2 viene percorso, il costo del ciclo sia inferiore a c");
             }
-
+            **/
             //il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)
-            if(Xij[e1][e2].get(GRB.DoubleAttr.X)==0 || Xij[f1][f2].get(GRB.DoubleAttr.X)==1){
-                expr = new GRBLinExpr();
-                expr.addTerm(1,Xij[d1][d2]);
-                model3.addConstr(expr, GRB.EQUAL, 0,"lato d percorribile se e solo se sono percorsi anche i lati f ed e");
-            }
-
+            //2*Xij[d1][d2] - Xij[e1][e2] - Xij[f1][f2] <= 0
+            expr = new GRBLinExpr();
+            expr.addTerm(2,Xij[d1][d2]);
+            expr.addTerm(-1,Xij[f1][f2]);
+            expr.addTerm(-1,Xij[e1][e2]);
+            model3.addConstr(expr, GRB.LESS_EQUAL, 0, "il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)");
+            /**
             //nel caso in cui i lati (g1, g2), (h1, h2) e (i1, i2) vengano tutti percorsi, si debba pagare un costo aggiuntivo pari a l.
-            if(Xij[e1][e2].get(GRB.DoubleAttr.X)==0)
-**/
-            //---------------------STAMPA A VIDEO-------------------------
-            System.out.printf("\n\n\n");
-            System.out.println("GRUPPO <coppia 16>");
-            System.out.println("Componenti: <Bresciani Simone> <Dagani Federico>\n");
-            System.out.println("QUESITO I:");
-            System.out.printf("funzione obiettivo = %d\n", (int)funzione_obiettivo_1);
-            System.out.print("ciclo ottimo 1: ");
-            System.out.println(ciclo);
-            System.out.println("\nQUESITO II:");
-            System.out.print("ciclo ottimo 2: ");
-            System.out.println(ciclo2);
+            //if(Xij[e1][e2].get(GRB.DoubleAttr.X)==0)
+            **/
+            //ottimizzazione
+            model3.optimize();
+
+            //salvataggio e display del valore della funzione obiettivo
+            double funzione_obiettivo_3 = model3.get(GRB.DoubleAttr.ObjVal);
+
+            //calcolo ciclo 3
+            ArrayList<Integer> ciclo3 = calcola_ciclo(Xij);
+
+            stampa_finale((int)funzione_obiettivo_1, ciclo1, ciclo2, (int)funzione_obiettivo_3, ciclo3);
 
         }catch(GRBException e){
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
@@ -403,12 +425,14 @@ public class Gurobi {
         String lettura;
         boolean start_parse = false;
 
+        String parola_start_read = "Vertici " + N_VERTICI;
+
         while((lettura = br.readLine()) != null){
             if(start_parse){
                 int[] numeri_letti = Arrays.stream(lettura.split(" ")).mapToInt(Integer::parseInt).toArray();
                 costi[numeri_letti[0]][numeri_letti[1]] = costi[numeri_letti[1]][numeri_letti[0]]= numeri_letti[2];
             }
-            if(lettura.equals("Vertici 43")){
+            if(lettura.equals(parola_start_read)){
                 start_parse = true;
             }
         }
@@ -417,4 +441,41 @@ public class Gurobi {
             costi[i][i] = 0;
         }
     }
+
+    public static void stampa_finale(int funzione_obiettivo_1, ArrayList<Integer> ciclo1, ArrayList<Integer> ciclo2, int funzione_obiettivo_3, ArrayList<Integer> ciclo3){
+        //---------------------STAMPA A VIDEO-------------------------
+        System.out.printf("\n\n\n");
+        System.out.println("GRUPPO <coppia 16>");
+        System.out.println("Componenti: <Bresciani Simone> <Dagani Federico>\n");
+        System.out.println("QUESITO I:");
+        System.out.printf("funzione obiettivo = %d\n", (int)funzione_obiettivo_1);
+        System.out.print("ciclo ottimo 1: ");
+        System.out.println(ciclo1);
+        System.out.println("\nQUESITO II:");
+        System.out.print("ciclo ottimo 2: ");
+        System.out.println(ciclo2);
+        System.out.println("\nQUESITO III:");
+        System.out.printf("funzione obiettivo = %d\n", (int)funzione_obiettivo_3);
+        System.out.print("ciclo ottimo 3: ");
+        System.out.println(ciclo3);
+    }
+
+    public static ArrayList<Integer> calcola_ciclo(GRBVar[][] Xij) throws GRBException {
+
+        ArrayList<Integer> ciclo = new ArrayList<>();
+        int precedente=0;
+        ciclo.add(precedente);
+        for(int i=0; i<N_VERTICI; i++){
+            for(int k= 0; k< N_VERTICI; k++) {
+                if (Xij[precedente][k].get(GRB.DoubleAttr.X) == 1) {
+                    ciclo.add(k);
+                    precedente=k;
+                    break;
+                }
+            }
+        }
+        return ciclo;
+    }
+
+    //potrei fare una funzione che restituisce il "modello base", ovvero quello utilizzato da tutti e tre i quesiti
 }
