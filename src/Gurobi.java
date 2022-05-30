@@ -172,9 +172,7 @@ public class Gurobi {
                 }
             }
 
-            for (int k = 0; k < z.length; k++){
-                expr.addTerm(l, z[k]);
-            }
+            expr.addTerm(l, z[0]);
 
             model.setObjective(expr);
             model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
@@ -231,7 +229,7 @@ public class Gurobi {
             expr.addTerm(1,Xij[h1][h2]);
             expr.addTerm(1,Xij[h2][h1]);
             expr.addTerm(1,Xij[i1][i2]);
-            expr.addTerm(1,Xij[h2][h1]);
+            expr.addTerm(1,Xij[i2][i1]);
             expr.addTerm(-3, z[0]);
             expr.addTerm(-2, z[1]);
             expr.addTerm(-1, z[3]);
@@ -440,6 +438,4 @@ public class Gurobi {
         }
         return z;
     }
-
-    //potrei fare una funzione che restituisce il "modello base", ovvero quello utilizzato da tutti e tre i quesiti
 }
