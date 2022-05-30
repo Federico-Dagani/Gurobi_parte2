@@ -1,7 +1,6 @@
 import gurobi.*;
 import gurobi.GRB.IntParam;
 
-import javax.transaction.xa.Xid;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -162,9 +161,23 @@ public class Gurobi {
 
             u = creazione_u(model3);
 
+            GRBVar[] z = creazione_z(model3);
+
             //---------------------------------------F.O.----------------------------------------
 
-            f_o(model3, Xij, costi);
+            expr = new GRBLinExpr();
+            for(int i=0; i< N_VERTICI; i++) {
+                for (int j = 0; j < N_VERTICI; j++) {
+                    expr.addTerm(costi[i][j], Xij[i][j]);
+                }
+            }
+
+            for (int k = 0; k < z.length; k++){
+                expr.addTerm(l, z[k]);
+            }
+
+            model.setObjective(expr);
+            model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
 
             //----------------------------------------VINCOLI--------------------------------------
 
@@ -211,17 +224,24 @@ public class Gurobi {
             expr.addTerm(M, Xij[b2][b1]);
             model3.addConstr(expr, GRB.LESS_EQUAL, M,"se il lato b1 b2 viene percorso, il costo del ciclo sia inferiore a c");
 
-
-
             //nel caso in cui i lati (g1, g2), (h1, h2) e (i1, i2) vengano tutti percorsi, si debba pagare un costo aggiuntivo pari a l.
             expr = new GRBLinExpr();
-            for(int i=0; i< N_VERTICI; i++) {
-                for (int j = 0; j < N_VERTICI; j++) {
-                    expr.addTerm(costi[i][j], Xij[i][j]);
-                    expr.addTerm(-costi[i][j], Xij[i][j]);
-                }
+            expr.addTerm(1,Xij[g1][g2]);
+            expr.addTerm(1,Xij[g2][g1]);
+            expr.addTerm(1,Xij[h1][h2]);
+            expr.addTerm(1,Xij[h2][h1]);
+            expr.addTerm(1,Xij[i1][i2]);
+            expr.addTerm(1,Xij[h2][h1]);
+            expr.addTerm(-3, z[0]);
+            expr.addTerm(-2, z[1]);
+            expr.addTerm(-1, z[3]);
+            model3.addConstr(expr, GRB.EQUAL, 0, "se i lat1 g1-g2, h1-h2, i1-i2  viengono percorsi, il costo del ciclo aumenta di l");
+
+            expr = new GRBLinExpr();
+            for(int k=0; k<3; k++){
+                expr.addTerm(1,z[k]);
             }
-            //model3.addConstr(expr, GRB.EQUAL, l,"se i lati g, h, i vengono tutti percorsi, si deve pagare un costo aggiuntivo l");
+            model3.addConstr(expr, GRB.EQUAL, 1, "solo uno z attivo");
 
             vincoli_assegnamento(model3, Xij);
 
@@ -410,6 +430,15 @@ public class Gurobi {
             u[m] = model.addVar(0.0, N_VERTICI, 0.0, GRB.INTEGER, "u "+ u);
         }
         return u;
+    }
+
+    public static GRBVar[] creazione_z(GRBModel model) throws GRBException{
+
+        GRBVar[] z = new GRBVar[3];
+        for (int i = 0; i<3; i++){
+            z[i] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "z " + z);
+        }
+        return z;
     }
 
     //potrei fare una funzione che restituisce il "modello base", ovvero quello utilizzato da tutti e tre i quesiti
