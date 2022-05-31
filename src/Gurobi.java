@@ -7,52 +7,11 @@ import java.util.Arrays;
 
 public class Gurobi {
 
-    private static final int N_VERTICI = 43;
-    private static final int M = 200;
+    private static final int N_VERTICI = 43; //costante corrispondente al numero di vertici o nodi del problema
+    private static final int M = 200; //costante M abbastanza stringente utilizzata per applicare un vincolo disgiuntivo nel punto C del quesito 3
 
     public static void main(String[] args) throws IOException {
         //lettura file txt
-         /** //gruppo68
-         int v = 13;
-         int a = 5;
-         int b1 = 15;
-         int b2 = 5;
-         int c = 134;
-         int d1 = 27;
-         int d2 = 36;
-         int e1 = 11;
-         int e2 = 5;
-         int f1 = 34;
-         int f2 = 38;
-         int g1 = 46;
-         int g2 = 0;
-         int h1 = 0;
-         int h2 = 32;
-         int i1  = 4;
-         int i2 = 21;
-         int l = 3;
-        **/
-        /** //gruppo25
-        int v = 2;
-        int a = 7;
-        int b1 = 6;
-        int b2 = 25;
-        int c = 114;
-        int d1 = 36;
-        int d2 = 1;
-        int e1 = 13;
-        int e2 = 10;
-        int f1 = 32;
-        int f2 = 2;
-        int g1 = 2;
-        int g2 = 8;
-        int h1 = 16;
-        int h2 = 39;
-        int i1  = 7;
-        int i2 = 9;
-        int l = 2;
-        **/
-        //gruppo16
         int v = 34;
         int a = 9;
         int b1 = 13;
@@ -73,7 +32,7 @@ public class Gurobi {
         int l = 7;
 
         String file_name = "src/coppia16.txt";
-
+        //lettura tramite parsing dei rimanenti dati del file
         int[][] costi = new int[N_VERTICI][N_VERTICI];
         parsing_file(file_name, costi);
 
@@ -95,11 +54,11 @@ public class Gurobi {
             //creazione variabili u di supporto
             GRBVar[] u = creazione_u(model);
 
-            //---------------------------------------F.O.----------------------------------------
+            //---------------------------------------F.O.-------------------------------------
 
             f_o(model, Xij, costi);
 
-            //-------------------------------------VINCOLI---------------------------------------
+            //-------------------------------------VINCOLI------------------------------------
 
             vincoli_assegnamento(model, Xij);
 
@@ -114,22 +73,21 @@ public class Gurobi {
             //calcolo ciclo modello 1
             ArrayList<Integer> ciclo1 = calcola_ciclo(Xij);
 
-            //-------------------------------------QUESITO II---------------------------------------
+            //---------------------------------------QUESITO II--------------------------------------------------
 
             //creo un nuovo modello identico al primo e aggiungo il vincolo che impone il raggiungimento
-            // dello stesso risultato della funzione obiettivo del quesito 1
+            //dello stesso risultato della funzione obiettivo del quesito 1
 
             GRBModel model2 = new GRBModel(env);
             //creazione variabili
             Xij = creazione_Xij(model2);
-
             u = creazione_u(model2);
 
-            //---------------------------------------F.O.----------------------------------------
+            //---------------------------------------F.O.-------------------------------------
 
             f_o(model2, Xij, costi);
 
-            //----------------------------------------VINCOLI--------------------------------------
+            //-------------------------------------VINCOLI------------------------------------
 
             vincoli_assegnamento(model2, Xij);
 
@@ -143,8 +101,7 @@ public class Gurobi {
                     expr.addTerm(costi[i][j], Xij[i][j]);
                 }
             }
-            model2.addConstr(expr, GRB.EQUAL, funzione_obiettivo_1, "valori funzioni obiettivo uguali");
-
+            model2.addConstr(expr, GRB.EQUAL, funzione_obiettivo_1, "valori funzioni obiettivo 1 e 2 uguali");
 
             //ottimizzazione
             model2.optimize();
@@ -152,18 +109,18 @@ public class Gurobi {
             //calcolo ciclo 2
             ArrayList<Integer> ciclo2 = calcola_ciclo(Xij);
 
-            //-----------------------------------QUESITO III---------------------------------
 
-            //creo un nuovo modello identico al modello 1 e scrivo i vincoli aggiuntivi
+
+            //---------------------------------------QUESITO III-------------------------------------------------
+
             GRBModel model3 = new GRBModel(env);
             //creazione variabili
             Xij = creazione_Xij(model3);
-
             u = creazione_u(model3);
-
+            //creazione variabili z implementate nella nuova funzione obiettivo per implementare il punto D del quesito 3 del compito
             GRBVar[] z = creazione_z(model3);
 
-            //---------------------------------------F.O.----------------------------------------
+            //---------------------------------------F.O.-------------------------------------
 
             expr = new GRBLinExpr();
             for(int i=0; i< N_VERTICI; i++) {
@@ -171,26 +128,27 @@ public class Gurobi {
                     expr.addTerm(costi[i][j], Xij[i][j]);
                 }
             }
-
+            //aggiungo la variabile binaria z[0] alla f.o. moltiplicata per l; se z[0] è pari a 1, allora la f.o. varrà l di più del dovuto (punto d)
             expr.addTerm(l, z[0]);
 
-            model.setObjective(expr);
-            model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
+            model3.setObjective(expr);
+            model3.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
 
-            //----------------------------------------VINCOLI--------------------------------------
+            //-------------------------------------VINCOLI------------------------------------
 
-            //VINCOLI AGGIUNTIVI
+            //------------------A-------------------
             //il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)
-            //2*Xij[d1][d2] - Xij[e1][e2] - Xij[f1][f2] <= 0
+            //2*Xij[d] - Xij[e] - Xij[f] <= 0
             expr = new GRBLinExpr();
-            expr.addTerm(2,Xij[d1][d2]);
-            expr.addTerm(2, Xij[d2][d1]);
+            expr.addTerm(2,Xij[d1][d2]);  //bisogna considerare sia il link dal nodo d1 a d2 sia il link contrario dal nodo d2 a d1
+            expr.addTerm(2, Xij[d2][d1]); //così per ogni vincolo aggiuntivo che segue nel medesimo quesito
             expr.addTerm(-1,Xij[f1][f2]);
             expr.addTerm(-1,Xij[f2][f1]);
             expr.addTerm(-1,Xij[e1][e2]);
             expr.addTerm(-1,Xij[e2][e1]);
             model3.addConstr(expr, GRB.LESS_EQUAL, 0, "il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)");
 
+            //------------------B-------------------
             //il costo dei lati incidenti a v sia al massimo il a% del costo totale del ciclo
             expr = new GRBLinExpr();
             for(int i=0; i< N_VERTICI; i++){
@@ -202,12 +160,11 @@ public class Gurobi {
             for(int i=0; i< N_VERTICI; i++) {
                 for (int j = 0; j < N_VERTICI; j++) {
                     expr.addTerm(-costi[i][j]*a/100, Xij[i][j]);
-                    //expr.addTerm(costi[i][v], Xij[i][v]);
-                    //expr.addTerm(costi[v][j], Xij[v][j]);
                 }
             }
             model3.addConstr(expr, GRB.LESS_EQUAL, 0 , "il costo dei lati incidenti a v sia al massimo il a% del costo");
 
+            //------------------C-------------------
             //se il lato (b1,b2) viene percorso, il costo del ciclo ottimo sia inferiore a c
             //utilizzo il valore M abbastanza stringente per creare un vincolo disgiuntivo
             expr = new GRBLinExpr();
@@ -222,7 +179,10 @@ public class Gurobi {
             expr.addTerm(M, Xij[b2][b1]);
             model3.addConstr(expr, GRB.LESS_EQUAL, M,"se il lato b1 b2 viene percorso, il costo del ciclo sia inferiore a c");
 
+            //------------------D-------------------
             //nel caso in cui i lati (g1, g2), (h1, h2) e (i1, i2) vengano tutti percorsi, si debba pagare un costo aggiuntivo pari a l.
+            //utilizzo le variabili binarie z[i]: Xij[g] + Xij[h] + Xij[i] = 3z[0] + 2z[1] + 1z[2]
+            //quando 3 di questi link vengono attivati allora z[0] deve valere 1. (oppure z[1] e z[2] contemporaneamente, ma lo risolvo al prossimo vincolo)
             expr = new GRBLinExpr();
             expr.addTerm(1,Xij[g1][g2]);
             expr.addTerm(1,Xij[g2][g1]);
@@ -232,14 +192,14 @@ public class Gurobi {
             expr.addTerm(1,Xij[i2][i1]);
             expr.addTerm(-3, z[0]);
             expr.addTerm(-2, z[1]);
-            expr.addTerm(-1, z[3]);
+            expr.addTerm(-1, z[2]);
             model3.addConstr(expr, GRB.EQUAL, 0, "se i lat1 g1-g2, h1-h2, i1-i2  viengono percorsi, il costo del ciclo aumenta di l");
-
+            //imposto che al più una sola z sia pari a 1 cosicchè non sia possibile avere z[1] e z[2] attive contemporaneamente.
             expr = new GRBLinExpr();
             for(int k=0; k<3; k++){
                 expr.addTerm(1,z[k]);
             }
-            model3.addConstr(expr, GRB.EQUAL, 1, "solo uno z attivo");
+            model3.addConstr(expr, GRB.LESS_EQUAL, 1, "al più solo uno z attivo");
 
             vincoli_assegnamento(model3, Xij);
 
@@ -256,19 +216,17 @@ public class Gurobi {
 
             stampa_finale((int)funzione_obiettivo_1, ciclo1, ciclo2, (int)funzione_obiettivo_3, ciclo3);
 
-            /**
-            for(int i=0; i< N_VERTICI; i++){
-                for(int j=0; j<N_VERTICI; j++){
-                    System.out.printf("[%d]", (int)Xij[i][j].get(GRB.DoubleAttr.X));
-
-                }
-                System.out.println();
-            }**/
         }catch(GRBException e){
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
         }
     }
 
+    /**
+     * metodo di lettura della matrice costi tra i vari nodi. Il salvataggio degli interi avviene dopo la lettura della stringa "Vertici ".
+     * @param file_name nome del file da cui leggere i dati
+     * @param costi matrice inizialmente vuota che viene riempita durante la lettura del file con i dati contenuti nel file
+     * @throws IOException
+     */
     public static void parsing_file(String file_name, int[][] costi) throws IOException {
 
         File file = new File(file_name);
@@ -293,26 +251,39 @@ public class Gurobi {
         }
     }
 
+    /**
+     * metodo che gestisce la stampa a video dei risultati del compito
+     * @param funzione_obiettivo_1 ottimo del modello 1
+     * @param ciclo1 ciclo ottimo del modello 1
+     * @param ciclo2 ciclo ottimo del modello 2
+     * @param funzione_obiettivo_3 ottimo del modello 3
+     * @param ciclo3 ciclo ottimo del modello 3
+     */
     public static void stampa_finale(int funzione_obiettivo_1, ArrayList<Integer> ciclo1, ArrayList<Integer> ciclo2, int funzione_obiettivo_3, ArrayList<Integer> ciclo3){
         //---------------------STAMPA A VIDEO-------------------------
         System.out.printf("\n\n\n");
         System.out.println("GRUPPO <coppia 16>");
         System.out.println("Componenti: <Bresciani Simone> <Dagani Federico>\n");
         System.out.println("QUESITO I:");
-        System.out.printf("funzione obiettivo = %d\n", (int)funzione_obiettivo_1);
+        System.out.printf("funzione obiettivo = %d\n", funzione_obiettivo_1);
         System.out.print("ciclo ottimo 1: ");
         System.out.println(ciclo1);
         System.out.println("\nQUESITO II:");
         System.out.print("ciclo ottimo 2: ");
         System.out.println(ciclo2);
         System.out.println("\nQUESITO III:");
-        System.out.printf("funzione obiettivo = %d\n", (int)funzione_obiettivo_3);
+        System.out.printf("funzione obiettivo = %d\n", funzione_obiettivo_3);
         System.out.print("ciclo ottimo 3: ");
         System.out.println(ciclo3);
     }
 
+    /**
+     * metodo che controlla quali Xij sono poste pari ad 1 e costruisce il ciclo passando link per link
+     * @param Xij variabili binarie Xij
+     * @return un array di lunghezza N_VERTICI+1 che identifica il ciclo fatto che parte dal nodo 0 e termine al nodo 0.
+     * @throws GRBException
+     */
     public static ArrayList<Integer> calcola_ciclo(GRBVar[][] Xij) throws GRBException {
-
         ArrayList<Integer> ciclo = new ArrayList<>();
         int precedente=0;
         ciclo.add(precedente);
@@ -328,6 +299,13 @@ public class Gurobi {
         return ciclo;
     }
 
+    /**
+     * metodo che impone al modello di gurobi i vincoli u affinchè la soluzione trovata non abbia cicli multipli al suo interno
+     * @param model modello gurobi
+     * @param Xij variabili binarie Xij
+     * @param u variabili di supporto u
+     * @throws GRBException
+     */
     public static void vincoli_u(GRBModel model, GRBVar[][] Xij, GRBVar[] u) throws GRBException{
 
         //vincoli di Miller-Tucker-Zemil utilizzando le variabili u di supporto
@@ -359,6 +337,13 @@ public class Gurobi {
         }
     }
 
+    /**
+     * metodo che impone al modello di gurobi i vincoli di assegnamento affinchè per ogni nodo ci sia un solo vincolo di entrata
+     * e uno di uscita e che questi siano diversi tra loro
+     * @param model modello di gurobi
+     * @param Xij variabili binare Xij
+     * @throws GRBException
+     */
     public static void vincoli_assegnamento(GRBModel model, GRBVar[][] Xij) throws GRBException{
 
         GRBLinExpr expr;
@@ -399,6 +384,13 @@ public class Gurobi {
         }
     }
 
+    /**
+     * metodo che impone al modello di gurobi la funzione obiettivo del problema: minimizzare il costo totale del ciclo
+     * @param model modello gurobi
+     * @param Xij variabili binarie Xij
+     * @param costi matrice definita contenente i costi per ciascun link
+     * @throws GRBException
+     */
     public static void f_o(GRBModel model, GRBVar[][] Xij, int[][] costi) throws GRBException{
         GRBLinExpr expr = new GRBLinExpr();
         for(int i=0; i< N_VERTICI; i++) {
@@ -410,6 +402,12 @@ public class Gurobi {
         model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE);
     }
 
+    /**
+     * metodo che dato un modello gurobi crea al suo interno una matrice di variabili binarie Xij
+     * @param model modello gurobi
+     * @return matrice quadrata di variabili binarie Xij di grandezza N_VERTICI
+     * @throws GRBException
+     */
     public static GRBVar[][] creazione_Xij(GRBModel model) throws GRBException{
 
         GRBVar[][] Xij = new GRBVar[N_VERTICI][N_VERTICI];
@@ -421,6 +419,12 @@ public class Gurobi {
         return Xij;
     }
 
+    /**
+     * metodo che dato un modello gurobi crea al suo interno un vettore di variabili intere u
+     * @param model modello gurobi
+     * @return vettore di variabili intere u di grandezza N_VERTICI
+     * @throws GRBException
+     */
     public static GRBVar[] creazione_u(GRBModel model) throws GRBException{
 
         GRBVar[] u = new GRBVar[N_VERTICI];
@@ -430,6 +434,12 @@ public class Gurobi {
         return u;
     }
 
+    /**
+     * metodo che dato un modello gurobi crea al suo interno un vettore di variabili binarie z
+     * @param model modello gurobi
+     * @return vettore di variabili binarie z di grandezza 3
+     * @throws GRBException
+     */
     public static GRBVar[] creazione_z(GRBModel model) throws GRBException{
 
         GRBVar[] z = new GRBVar[3];
