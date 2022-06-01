@@ -96,19 +96,9 @@ public class Gurobi {
 
             vincoli_u(model2, Xij, u);
 
-            //Vincolo aggiunto rispetto al quesito I.
-            //Impone che la funzione obiettivo sia pari a quella del primo quesito
-            GRBLinExpr expr = new GRBLinExpr();
-            for(int i=0; i< N_VERTICI; i++) {
-                for (int j = 0; j < N_VERTICI; j++) {
-                    expr.addTerm(costi[i][j], Xij[i][j]);
-                }
-            }
-            model2.addConstr(expr, GRB.GREATER_EQUAL, funzione_obiettivo_1, "valori funzioni obiettivo 1 e 2 uguali");
-
             //vincolo per verificare che la soluzione ottima trovata sia diversa da quella trovata nel primo qusito
             //impongo che almeno una Xij del nuovo modello, tra tutte quelle che si trovavano nella posizione ottima per il modello 1, sia pari a 0.
-            expr = new GRBLinExpr();
+            GRBLinExpr expr = new GRBLinExpr();
             for(int i = 0; i < N_VERTICI; i++){
                 for(int j = 0; j < N_VERTICI; j++){
                     if(i!=j) {
@@ -155,18 +145,6 @@ public class Gurobi {
             //-------------------------------------VINCOLI------------------------------------
 
             //------------------A-------------------
-            //il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)
-            //2*Xij[d] - Xij[e] - Xij[f] <= 0
-            expr = new GRBLinExpr();
-            expr.addTerm(2,Xij[d1][d2]);  //bisogna considerare sia il link dal nodo d1 a d2 sia il link contrario dal nodo d2 a d1
-            expr.addTerm(2, Xij[d2][d1]); //così per ogni vincolo aggiuntivo che segue nel medesimo quesito
-            expr.addTerm(-1,Xij[f1][f2]);
-            expr.addTerm(-1,Xij[f2][f1]);
-            expr.addTerm(-1,Xij[e1][e2]);
-            expr.addTerm(-1,Xij[e2][e1]);
-            model3.addConstr(expr, GRB.LESS_EQUAL, 0, "il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)");
-
-            //------------------B-------------------
             //il costo dei lati incidenti a v sia al massimo il a% del costo totale del ciclo
             expr = new GRBLinExpr();
             for(int i=0; i< N_VERTICI; i++){
@@ -177,12 +155,12 @@ public class Gurobi {
             }
             for(int i=0; i< N_VERTICI; i++) {
                 for (int j = 0; j < N_VERTICI; j++) {
-                    expr.addTerm(-costi[i][j]*a/100, Xij[i][j]);
+                    expr.addTerm(((double)-costi[i][j]*a/100), Xij[i][j]);
                 }
             }
             model3.addConstr(expr, GRB.LESS_EQUAL, 0 , "il costo dei lati incidenti a v sia al massimo il a% del costo");
 
-            //------------------C-------------------
+            //------------------B-------------------
             //se il lato (b1,b2) viene percorso, il costo del ciclo ottimo sia inferiore a c
             //utilizzo il valore bigM abbastanza stringente per creare un vincolo disgiuntivo
             int bigM = trova_bigM(costi);
@@ -197,6 +175,18 @@ public class Gurobi {
             expr.addTerm(bigM, Xij[b1][b2]);
             expr.addTerm(bigM, Xij[b2][b1]);
             model3.addConstr(expr, GRB.LESS_EQUAL, bigM,"se il lato b1 b2 viene percorso, il costo del ciclo sia inferiore a c");
+
+            //------------------C-------------------
+            //il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)
+            //2*Xij[d] - Xij[e] - Xij[f] <= 0
+            expr = new GRBLinExpr();
+            expr.addTerm(2,Xij[d1][d2]);  //bisogna considerare sia il link dal nodo d1 a d2 sia il link contrario dal nodo d2 a d1
+            expr.addTerm(2, Xij[d2][d1]); //così per ogni vincolo aggiuntivo che segue nel medesimo quesito
+            expr.addTerm(-1,Xij[f1][f2]);
+            expr.addTerm(-1,Xij[f2][f1]);
+            expr.addTerm(-1,Xij[e1][e2]);
+            expr.addTerm(-1,Xij[e2][e1]);
+            model3.addConstr(expr, GRB.LESS_EQUAL, 0, "il lato (d1, d2) sia percorribile se e solo se sono percorsi anche i lati (e1, e2) e (f1, f2)");
 
             //------------------D-------------------
             //nel caso in cui i lati (g1, g2), (h1, h2) e (i1, i2) vengano tutti percorsi, si debba pagare un costo aggiuntivo pari a l.
@@ -401,7 +391,7 @@ public class Gurobi {
      * @param costi matrice definita contenente i costi per ciascun link
      * @throws GRBException
      */
-    public static void f_o(GRBModel model, GRBVar[][] Xij, int[][] costi) throws GRBException{
+    public static void  f_o(GRBModel model, GRBVar[][] Xij, int[][] costi) throws GRBException{
         GRBLinExpr expr = new GRBLinExpr();
         for(int i=0; i< N_VERTICI; i++) {
             for (int j = 0; j < N_VERTICI; j++) {
@@ -438,7 +428,7 @@ public class Gurobi {
     public static GRBVar[] creazione_u(GRBModel model) throws GRBException{
 
         GRBVar[] u = new GRBVar[N_VERTICI];
-        for (int m=0; m<N_VERTICI-1; m++){
+        for (int m=0; m < N_VERTICI-1; m++){
             u[m] = model.addVar(1, N_VERTICI-1, 0.0, GRB.INTEGER, "u "+ u);
         }
         return u;
@@ -459,7 +449,11 @@ public class Gurobi {
         return z;
     }
 
-    //metoto che calcola il valore di M, corrispondente al valore del ciclo di costo massimo
+    /**
+     * metodo che calcola il valore di M, corrispondente al valore del ciclo di costo massimo
+     * @param costi matrice definita contenente i costi per ciascun link
+     * @return valore di M
+     */
     public static int trova_bigM(int[][] costi){
         int bigM = 0;
         int[] riga_i;
