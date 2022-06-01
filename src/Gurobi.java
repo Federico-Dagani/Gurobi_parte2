@@ -332,29 +332,16 @@ public class Gurobi {
     public static void vincoli_u(GRBModel model, GRBVar[][] Xij, GRBVar[] u) throws GRBException{
 
         //vincoli di Miller-Tucker-Zemil utilizzando le variabili u di supporto
-        //u[0] = 1
-        GRBLinExpr expr = new GRBLinExpr();
-        expr.addTerm(1,u[0]);
-        model.addConstr(expr, GRB.EQUAL, 1, "assegnazione u[1]");
-        //2 <= u[i] <= N con i= 1...N-1
-        for (int i=1; i<N_VERTICI; i++){
-            expr = new GRBLinExpr();
-            expr.addTerm(1,u[i]);
-            model.addConstr(expr, GRB.GREATER_EQUAL, 2, "limite inferiore di 2");
-            expr = new GRBLinExpr();
-            expr.addTerm(1,u[i]);
-            model.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI, "limite superiore di " + (N_VERTICI-1));
-        }
-        //u[j] >= u[i] + 1 - ((N-1)-1)(1-xij) con  i != j  e  i,j = 1...N-1
-        //svolgendo il calcolo: u[j] >= u[i] + 2 - (N-1) + xij((N-1)-1)
-        for(int i=1; i<N_VERTICI-1; i++){
+        //u[j] >= u[i] + 1 - (N-1)(1-xij) con  i != j  e  i,j = 1...N-1
+        //svolgendo il calcolo: u[j] >= u[i] + 2 - N + xij(N-1)
+        for(int i=1; i<N_VERTICI; i++){
             for(int j=1; j<N_VERTICI; j++){
-                expr = new GRBLinExpr();
+                GRBLinExpr expr = new GRBLinExpr();
                 if(i!=j) {
-                    expr.addTerm((N_VERTICI - 1) - 1 , Xij[i][j]);
-                    expr.addTerm(-1, u[j]);
-                    expr.addTerm(1, u[i]);
-                    model.addConstr(expr, GRB.LESS_EQUAL, (N_VERTICI- 1) - 2 , "vincolo di sequenzialità delle variabili u");
+                    expr.addTerm((N_VERTICI) - 1 , Xij[i][j]);
+                    expr.addTerm(-1, u[j-1]);
+                    expr.addTerm(1, u[i-1]);
+                    model.addConstr(expr, GRB.LESS_EQUAL, (N_VERTICI) - 2 , "vincolo di sequenzialità delle variabili u");
                 }
             }
         }
@@ -451,8 +438,8 @@ public class Gurobi {
     public static GRBVar[] creazione_u(GRBModel model) throws GRBException{
 
         GRBVar[] u = new GRBVar[N_VERTICI];
-        for (int m=0; m<N_VERTICI; m++){
-            u[m] = model.addVar(0.0, N_VERTICI, 0.0, GRB.INTEGER, "u "+ u);
+        for (int m=0; m<N_VERTICI-1; m++){
+            u[m] = model.addVar(1, N_VERTICI-1, 0.0, GRB.INTEGER, "u "+ u);
         }
         return u;
     }
