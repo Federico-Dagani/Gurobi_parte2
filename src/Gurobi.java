@@ -126,6 +126,7 @@ public class Gurobi {
             //calcolo ciclo 2
             ArrayList<Integer> ciclo2 = calcola_ciclo(Xij);
 
+            double funzione_obiettivo_2 = model2.get(GRB.DoubleAttr.ObjVal);
 
 
             //---------------------------------------QUESITO III-------------------------------------------------
@@ -232,7 +233,7 @@ public class Gurobi {
             //calcolo ciclo 3
             ArrayList<Integer> ciclo3 = calcola_ciclo(Xij);
 
-            stampa_finale((int)funzione_obiettivo_1, ciclo1, ciclo2, (int)funzione_obiettivo_3, ciclo3);
+            stampa_finale((int)funzione_obiettivo_1, ciclo1,(int)funzione_obiettivo_2, ciclo2, (int)funzione_obiettivo_3, ciclo3);
 
         }catch(GRBException e){
             System.out.println("Error code: " + e.getErrorCode() + ". " + e.getMessage());
