@@ -2,13 +2,13 @@ import gurobi.*;
 import gurobi.GRB.IntParam;
 
 import java.io.*;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Gurobi {
 
     private static final int N_VERTICI = 43; //costante corrispondente al numero di vertici o nodi del problema
-    private static final int M = 200; //costante M abbastanza stringente utilizzata per applicare un vincolo disgiuntivo nel punto C del quesito 3
 
     public static void main(String[] args) throws IOException {
         //lettura file txt
@@ -67,6 +67,9 @@ public class Gurobi {
             //ottimizzazione modello gurobi
             model.optimize();
 
+            //salvo il valore delle Xij perchè mi serviranno nel quesito 2
+            GRBVar Xij_1[][] = Xij;
+
             //salvataggio e display del valore della funzione obiettivo
             double funzione_obiettivo_1 = model.get(GRB.DoubleAttr.ObjVal);
 
@@ -101,7 +104,21 @@ public class Gurobi {
                     expr.addTerm(costi[i][j], Xij[i][j]);
                 }
             }
-            model2.addConstr(expr, GRB.EQUAL, funzione_obiettivo_1, "valori funzioni obiettivo 1 e 2 uguali");
+            model2.addConstr(expr, GRB.GREATER_EQUAL, funzione_obiettivo_1, "valori funzioni obiettivo 1 e 2 uguali");
+
+            //vincolo per verificare che la soluzione ottima trovata sia diversa da quella trovata nel primo qusito
+            //impongo che almeno una Xij del nuovo modello, tra tutte quelle che si trovavano nella posizione ottima per il modello 1, sia pari a 0.
+            expr = new GRBLinExpr();
+            for(int i = 0; i < N_VERTICI; i++){
+                for(int j = 0; j < N_VERTICI; j++){
+                    if(i!=j) {
+                        if (Xij_1[i][j].get(GRB.DoubleAttr.X) == 1) {
+                            expr.addTerm(1, Xij[i][j]);
+                        }
+                    }
+                }
+            }
+            model2.addConstr(expr, GRB.LESS_EQUAL, N_VERTICI-1, "Devo ottenere una soluzione ottima diversa");
 
             //ottimizzazione
             model2.optimize();
@@ -166,7 +183,8 @@ public class Gurobi {
 
             //------------------C-------------------
             //se il lato (b1,b2) viene percorso, il costo del ciclo ottimo sia inferiore a c
-            //utilizzo il valore M abbastanza stringente per creare un vincolo disgiuntivo
+            //utilizzo il valore bigM abbastanza stringente per creare un vincolo disgiuntivo
+            int bigM = trova_bigM(costi);
             expr = new GRBLinExpr();
             for(int i=0; i< N_VERTICI; i++) {
                 for (int j = 0; j < N_VERTICI; j++) {
@@ -175,9 +193,9 @@ public class Gurobi {
             }
             expr.addTerm(-c, Xij[b1][b2]);
             expr.addTerm(-c, Xij[b2][b1]);
-            expr.addTerm(M, Xij[b1][b2]);
-            expr.addTerm(M, Xij[b2][b1]);
-            model3.addConstr(expr, GRB.LESS_EQUAL, M,"se il lato b1 b2 viene percorso, il costo del ciclo sia inferiore a c");
+            expr.addTerm(bigM, Xij[b1][b2]);
+            expr.addTerm(bigM, Xij[b2][b1]);
+            model3.addConstr(expr, GRB.LESS_EQUAL, bigM,"se il lato b1 b2 viene percorso, il costo del ciclo sia inferiore a c");
 
             //------------------D-------------------
             //nel caso in cui i lati (g1, g2), (h1, h2) e (i1, i2) vengano tutti percorsi, si debba pagare un costo aggiuntivo pari a l.
@@ -259,7 +277,7 @@ public class Gurobi {
      * @param funzione_obiettivo_3 ottimo del modello 3
      * @param ciclo3 ciclo ottimo del modello 3
      */
-    public static void stampa_finale(int funzione_obiettivo_1, ArrayList<Integer> ciclo1, ArrayList<Integer> ciclo2, int funzione_obiettivo_3, ArrayList<Integer> ciclo3){
+    public static void stampa_finale(int funzione_obiettivo_1, ArrayList<Integer> ciclo1, int funzione_obiettivo_2, ArrayList<Integer> ciclo2, int funzione_obiettivo_3, ArrayList<Integer> ciclo3){
         //---------------------STAMPA A VIDEO-------------------------
         System.out.printf("\n\n\n");
         System.out.println("GRUPPO <coppia 16>");
@@ -269,8 +287,12 @@ public class Gurobi {
         System.out.print("ciclo ottimo 1: ");
         System.out.println(ciclo1);
         System.out.println("\nQUESITO II:");
-        System.out.print("ciclo ottimo 2: ");
-        System.out.println(ciclo2);
+        if(funzione_obiettivo_1 != funzione_obiettivo_2)
+            System.out.println("Non esiste un ciclo ottimo con stesso valore della funzione obiettivo del quesito 1");
+        else {
+            System.out.print("ciclo ottimo 2: ");
+            System.out.println(ciclo2);
+        }
         System.out.println("\nQUESITO III:");
         System.out.printf("funzione obiettivo = %d\n", funzione_obiettivo_3);
         System.out.print("ciclo ottimo 3: ");
@@ -447,5 +469,18 @@ public class Gurobi {
             z[i] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "z " + z);
         }
         return z;
+    }
+
+    //metoto che calcola il valore di M, corrispondente al valore del ciclo di costo massimo
+    public static int trova_bigM(int[][] costi){
+        int bigM = 0;
+        int[] riga_i;
+
+        for (int i=0; i<N_VERTICI; i++){
+            riga_i = costi[i];
+            bigM += Arrays.stream(riga_i).max().getAsInt();
+        }
+
+        return bigM;
     }
 }
